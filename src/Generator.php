@@ -43,7 +43,7 @@ class Generator
      *
      * @return $this
      */
-    public function for (string $email)
+    public function for(string $email)
     {
         $this->email = $email;
 
@@ -80,7 +80,19 @@ class Generator
     protected function build(): Invite
     {
         $invite = new Invite;
-        $invite->code = Str::upper(Str::random(5));
+        switch (strtolower(config('doorman.generator_type'))) {
+            case 'string':
+                $invite->code = Str::upper(Str::random(config('doorman.generator_string_length')));
+                break;
+
+            case 'uuid':
+                $invite->code = Ramsey\Uuid\Uuid::uuid4();
+                break;
+            
+            default:
+                break;
+        }
+        
         $invite->for = $this->email;
         $invite->max = $this->uses;
         $invite->valid_until = $this->expiry;
